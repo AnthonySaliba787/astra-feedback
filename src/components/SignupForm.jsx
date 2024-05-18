@@ -1,20 +1,69 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import CryptoJS from "crypto-js";
 
 function LoginForm() {
-  const [inputValue, setInputValue] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isPasswordShort, setIsPasswordShort] = useState(false);
+  const navigate = useNavigate();
 
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
+  const handleInputChange = (e, setInputFunction) => {
+    setInputFunction(e.target.value);
   };
 
   const handleShortPassword = () => {
-    if (inputValue.length < 8) {
+    if (password.length < 8) {
       setIsPasswordShort(true);
     } else {
       setIsPasswordShort(false);
     }
+  };
+
+  const handleSignUp = () => {
+    if (password.length < 8) {
+      setIsPasswordShort(true);
+      return;
+    }
+
+    // Validate email format
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+
+    // Validate username format
+    const usernamePattern = /^[a-zA-Z0-9_]+$/;
+    if (!usernamePattern.test(username)) {
+      alert("Username can only contain letters, numbers, and underscores.");
+      return;
+    }
+
+    // Retrieve existing user data
+    const storedUserData = localStorage.getItem("userData");
+    if (storedUserData) {
+      const userData = JSON.parse(storedUserData);
+      if (userData.username === username || userData.email === email) {
+        alert("This email or username exists already!");
+        return;
+      }
+    }
+
+    // Encrypt the password before storing it locally
+    const encryptedPassword = CryptoJS.AES.encrypt(
+      password,
+      import.meta.env.VITE_SECRET_KEY
+    ).toString();
+
+    // Store user data locally
+    localStorage.setItem(
+      "userData",
+      JSON.stringify({ username, email, password: encryptedPassword })
+    );
+
+    navigate("/feedback");
   };
 
   return (
@@ -30,6 +79,8 @@ function LoginForm() {
               <input
                 type="text"
                 placeholder="Username.."
+                value={username}
+                onChange={(e) => handleInputChange(e, setUsername)}
                 className="bg-neutral-100 shadow-md rounded-md indent-2 py-2 px-2 placeholder:text-sm placeholder:font-medium hover:bg-neutral-200 focus:bg-neutral-200 duration-300"
               />
             </div>
@@ -40,6 +91,8 @@ function LoginForm() {
               <input
                 type="email"
                 placeholder="Email.."
+                value={email}
+                onChange={(e) => handleInputChange(e, setEmail)}
                 className="bg-neutral-100 shadow-md rounded-md indent-2 py-2 px-2 placeholder:text-sm placeholder:font-medium hover:bg-neutral-200 focus:bg-neutral-200 duration-300"
               />
             </div>
@@ -50,8 +103,8 @@ function LoginForm() {
               <input
                 type="password"
                 placeholder="Password.."
-                value={inputValue}
-                onChange={handleInputChange}
+                value={password}
+                onChange={(e) => handleInputChange(e, setPassword)}
                 className="bg-neutral-100 shadow-md rounded-md indent-2 py-2 px-2 placeholder:text-sm placeholder:font-medium hover:bg-neutral-200 focus:bg-neutral-200 duration-300"
               />
               {isPasswordShort ? (
@@ -70,7 +123,7 @@ function LoginForm() {
             </p>
           </NavLink>
           <button
-            onClick={handleShortPassword}
+            onClick={handleSignUp}
             className="w-1/2 font-medium py-4 bg-neutral-600 text-neutral-100 shadow-md rounded-md hover:bg-neutral-500 focus:bg-neutral-500 active:bg-neutral-400 duration-300"
           >
             Sign Up

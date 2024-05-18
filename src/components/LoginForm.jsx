@@ -1,6 +1,41 @@
-import { NavLink } from "react-router-dom";
+import { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import CryptoJS from "crypto-js";
 
 function LoginForm() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+
+  const handleInputChange = (e, setInputFunction) => {
+    setInputFunction(e.target.value);
+  };
+
+  const handleLogin = () => {
+    // Retrieve stored user data
+    const storedUserData = localStorage.getItem("userData");
+    if (storedUserData) {
+      const userData = JSON.parse(storedUserData);
+      // Decrypt the stored password
+      const decryptedPassword = CryptoJS.AES.decrypt(
+        userData.password,
+        import.meta.env.VITE_SECRET_KEY
+      ).toString(CryptoJS.enc.Utf8);
+
+      // Check if email and password match stored data
+      if (userData.email === email && decryptedPassword === password) {
+        // Login successful, you can redirect the user or perform other actions
+        navigate("/feedback");
+      } else {
+        // Handle incorrect email or password
+        alert("Incorrect email or password!");
+      }
+    } else {
+      // Handle case where no user data is stored
+      alert("Cannot find any data available");
+    }
+  };
+
   return (
     <>
       <div className="max-w-xl min-h-screen mx-auto text-center flex flex-col justify-center items-center px-8 py-8">
@@ -14,6 +49,8 @@ function LoginForm() {
               <input
                 type="email"
                 placeholder="Email.."
+                value={email}
+                onChange={(e) => handleInputChange(e, setEmail)}
                 className="bg-neutral-100 shadow-md rounded-md indent-2 py-2 px-2 placeholder:text-sm placeholder:font-medium hover:bg-neutral-200 focus:bg-neutral-200 duration-300"
               />
             </div>
@@ -24,6 +61,8 @@ function LoginForm() {
               <input
                 type="password"
                 placeholder="Password.."
+                value={password}
+                onChange={(e) => handleInputChange(e, setPassword)}
                 className="bg-neutral-100 shadow-md rounded-md indent-2 py-2 px-2 placeholder:text-sm placeholder:font-medium hover:bg-neutral-200 focus:bg-neutral-200 duration-300"
               />
             </div>
@@ -33,7 +72,10 @@ function LoginForm() {
               Don't have an account?
             </p>
           </NavLink>
-          <button className="w-1/2 font-medium py-4 bg-neutral-600 text-neutral-100 shadow-md rounded-md hover:bg-neutral-500 focus:bg-neutral-500 active:bg-neutral-400 duration-300">
+          <button
+            onClick={handleLogin}
+            className="w-1/2 font-medium py-4 bg-neutral-600 text-neutral-100 shadow-md rounded-md hover:bg-neutral-500 focus:bg-neutral-500 active:bg-neutral-400 duration-300"
+          >
             Login
           </button>
         </div>
