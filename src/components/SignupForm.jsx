@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import CryptoJS from "crypto-js";
 
@@ -13,13 +13,12 @@ function LoginForm() {
     setInputFunction(e.target.value);
   };
 
-  const handleShortPassword = () => {
-    if (password.length < 8) {
-      setIsPasswordShort(true);
-    } else {
-      setIsPasswordShort(false);
+  useEffect(() => {
+    const storedUserData = localStorage.getItem("userData");
+    if (storedUserData) {
+      navigate("/feedback");
     }
-  };
+  }, [navigate]);
 
   const handleSignUp = () => {
     if (password.length < 8) {
