@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import CryptoJS from "crypto-js";
 
@@ -10,13 +10,6 @@ function LoginForm() {
   const handleInputChange = (e, setInputFunction) => {
     setInputFunction(e.target.value);
   };
-
-  useEffect(() => {
-    const storedUserData = localStorage.getItem("userData");
-    if (storedUserData) {
-      navigate("/feedback");
-    }
-  }, [navigate]);
 
   const handleLogin = () => {
     // Retrieve stored user data
